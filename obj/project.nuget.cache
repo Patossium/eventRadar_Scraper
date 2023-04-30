@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "PnJ25V1nobrHssTdvm0a+JOlh1rfTRb3EMV9SDrrnHnvtmnqp9Qj7dlEuYoLrUnPQl5Avh1CCCevo4z5puthLA==",
+  "dgSpecHash": "EAmF24W/22Etfpo964rVEJ916SvPjdgME17/5ObsR5K1TD+sNyd3pbagPVTdokAKcru+JNmm1998f0xoDrul8A==",
   "success": true,
-  "projectFilePath": "C:\\Users\\p4t0s\\Desktop\\eventRadar_scraper\\eventRadar_Scraper\\eventRadar_Scraper.csproj",
+  "projectFilePath": "C:\\Users\\p4t0s\\Desktop\\eventRadar_Scraper\\eventRadar_Scraper\\eventRadar_Scraper.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\p4t0s\\.nuget\\packages\\azure.core\\1.24.0\\azure.core.1.24.0.nupkg.sha512",
     "C:\\Users\\p4t0s\\.nuget\\packages\\azure.identity\\1.6.0\\azure.identity.1.6.0.nupkg.sha512",

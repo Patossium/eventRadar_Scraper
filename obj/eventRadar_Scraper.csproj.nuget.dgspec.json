@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\p4t0s\\Desktop\\eventRadar_scraper\\eventRadar_Scraper\\eventRadar_Scraper.csproj": {}
+    "C:\\Users\\p4t0s\\Desktop\\eventRadar_Scraper\\eventRadar_Scraper\\eventRadar_Scraper.csproj": {}
   },
   "projects": {
-    "C:\\Users\\p4t0s\\Desktop\\eventRadar_scraper\\eventRadar_Scraper\\eventRadar_Scraper.csproj": {
+    "C:\\Users\\p4t0s\\Desktop\\eventRadar_Scraper\\eventRadar_Scraper\\eventRadar_Scraper.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\p4t0s\\Desktop\\eventRadar_scraper\\eventRadar_Scraper\\eventRadar_Scraper.csproj",
+        "projectUniqueName": "C:\\Users\\p4t0s\\Desktop\\eventRadar_Scraper\\eventRadar_Scraper\\eventRadar_Scraper.csproj",
         "projectName": "eventRadar_Scraper",
-        "projectPath": "C:\\Users\\p4t0s\\Desktop\\eventRadar_scraper\\eventRadar_Scraper\\eventRadar_Scraper.csproj",
+        "projectPath": "C:\\Users\\p4t0s\\Desktop\\eventRadar_Scraper\\eventRadar_Scraper\\eventRadar_Scraper.csproj",
         "packagesPath": "C:\\Users\\p4t0s\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\p4t0s\\Desktop\\eventRadar_scraper\\eventRadar_Scraper\\obj\\",
+        "outputPath": "C:\\Users\\p4t0s\\Desktop\\eventRadar_Scraper\\eventRadar_Scraper\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\p4t0s\\AppData\\Roaming\\NuGet\\NuGet.Config",
