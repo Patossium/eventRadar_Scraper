@@ -94,3 +94,8 @@ C:\Users\p4t0s\Desktop\eventRadar_Scraper\eventRadar_Scraper\obj\Debug\net7.0\ev
 C:\Users\p4t0s\Desktop\eventRadar_Scraper\eventRadar_Scraper\obj\Debug\net7.0\ref\eventRadar_Scraper.dll
 C:\Users\p4t0s\Desktop\eventRadar_scraper\eventRadar_Scraper\bin\Debug\net7.0\ProxySharp.dll
 C:\Users\p4t0s\Desktop\eventRadar_scraper\eventRadar_Scraper\bin\Debug\net7.0\ProxySharp.Tcp.dll
+C:\Users\p4t0s\Desktop\eventRadar_Scraper\eventRadar_Scraper\bin\Debug\net7.0\selenium-manager\linux\selenium-manager
+C:\Users\p4t0s\Desktop\eventRadar_Scraper\eventRadar_Scraper\bin\Debug\net7.0\selenium-manager\macos\selenium-manager
+C:\Users\p4t0s\Desktop\eventRadar_Scraper\eventRadar_Scraper\bin\Debug\net7.0\selenium-manager\windows\selenium-manager.exe
+C:\Users\p4t0s\Desktop\eventRadar_Scraper\eventRadar_Scraper\bin\Debug\net7.0\Newtonsoft.Json.dll
+C:\Users\p4t0s\Desktop\eventRadar_Scraper\eventRadar_Scraper\bin\Debug\net7.0\WebDriver.dll

@@ -732,6 +732,19 @@
           }
         }
       },
+      "Newtonsoft.Json/13.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "ProxySharp/1.0.0": {
         "type": "package",
         "dependencies": {
@@ -960,6 +973,21 @@
         "runtime": {
           "lib/netstandard2.0/ScrapySharp.Core.dll": {},
           "lib/netstandard2.0/ScrapySharp.dll": {}
+        }
+      },
+      "Selenium.WebDriver/4.9.0": {
+        "type": "package",
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.1"
+        },
+        "compile": {
+          "lib/net6.0/WebDriver.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0/WebDriver.dll": {}
+        },
+        "build": {
+          "buildTransitive/Selenium.WebDriver.targets": {}
         }
       },
       "System.Buffers/4.5.1": {
@@ -3147,6 +3175,33 @@
         "version.txt"
       ]
     },
+    "Newtonsoft.Json/13.0.1": {
+      "sha512": "ppPFpBcvxdsfUonNcvITKqLl3bqxWbDCZIzDWHzjpdAHRFfZe0Dw9HmA0+za13IdyrgJwpkDTDA9fHaxOrt20A==",
+      "type": "package",
+      "path": "newtonsoft.json/13.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.md",
+        "lib/net20/Newtonsoft.Json.dll",
+        "lib/net20/Newtonsoft.Json.xml",
+        "lib/net35/Newtonsoft.Json.dll",
+        "lib/net35/Newtonsoft.Json.xml",
+        "lib/net40/Newtonsoft.Json.dll",
+        "lib/net40/Newtonsoft.Json.xml",
+        "lib/net45/Newtonsoft.Json.dll",
+        "lib/net45/Newtonsoft.Json.xml",
+        "lib/netstandard1.0/Newtonsoft.Json.dll",
+        "lib/netstandard1.0/Newtonsoft.Json.xml",
+        "lib/netstandard1.3/Newtonsoft.Json.dll",
+        "lib/netstandard1.3/Newtonsoft.Json.xml",
+        "lib/netstandard2.0/Newtonsoft.Json.dll",
+        "lib/netstandard2.0/Newtonsoft.Json.xml",
+        "newtonsoft.json.13.0.1.nupkg.sha512",
+        "newtonsoft.json.nuspec",
+        "packageIcon.png"
+      ]
+    },
     "ProxySharp/1.0.0": {
       "sha512": "yy3xEO/D02VEeRKkkIeZWBuMFQIyL0oHwiC4v5YKOiXrhFUIIapfVR+/jH5G4KqzsMtm6Nae2RmpsBW7q85pUw==",
       "type": "package",
@@ -3455,6 +3510,31 @@
         "lib/netstandard2.0/ScrapySharp.dll",
         "scrapysharp.3.0.0.nupkg.sha512",
         "scrapysharp.nuspec"
+      ]
+    },
+    "Selenium.WebDriver/4.9.0": {
+      "sha512": "7MiV7cpu5LuM7bBhMz/a25Lb78rFyfl8v2G3q56TAtxdDJEj3WXaRMDyytrKq1YVZ7jaN3pygku0n0IsYfe/SQ==",
+      "type": "package",
+      "path": "selenium.webdriver/4.9.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "build/Selenium.WebDriver.targets",
+        "buildTransitive/Selenium.WebDriver.targets",
+        "images/icon.png",
+        "lib/net45/WebDriver.dll",
+        "lib/net46/WebDriver.dll",
+        "lib/net47/WebDriver.dll",
+        "lib/net48/WebDriver.dll",
+        "lib/net5.0/WebDriver.dll",
+        "lib/net6.0/WebDriver.dll",
+        "lib/netstandard2.0/WebDriver.dll",
+        "lib/netstandard2.1/WebDriver.dll",
+        "manager/linux/selenium-manager",
+        "manager/macos/selenium-manager",
+        "manager/windows/selenium-manager.exe",
+        "selenium.webdriver.4.9.0.nupkg.sha512",
+        "selenium.webdriver.nuspec"
       ]
     },
     "System.Buffers/4.5.1": {
@@ -6474,7 +6554,8 @@
       "Microsoft.IdentityModel >= 7.0.0",
       "ProxySharp >= 1.0.0",
       "ProxySharp.Tcp >= 1.0.1",
-      "ScrapySharp >= 3.0.0"
+      "ScrapySharp >= 3.0.0",
+      "Selenium.WebDriver >= 4.9.0"
     ]
   },
   "packageFolders": {
@@ -6551,6 +6632,10 @@
           "ScrapySharp": {
             "target": "Package",
             "version": "[3.0.0, )"
+          },
+          "Selenium.WebDriver": {
+            "target": "Package",
+            "version": "[4.9.0, )"
           }
         },
         "imports": [

@@ -75,6 +75,10 @@
             "ScrapySharp": {
               "target": "Package",
               "version": "[3.0.0, )"
+            },
+            "Selenium.WebDriver": {
+              "target": "Package",
+              "version": "[4.9.0, )"
             }
           },
           "imports": [
