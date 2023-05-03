@@ -32,122 +32,77 @@ namespace scraper
         static void Main(string[] args)
         {
             using (var context = new WebDbContext())
-            { 
+            {
                 var blacklistedCategories = context.BlacklistedCategoryNames.ToList();
                 var blackCategories = new List<string>();
                 var blacklistedPages = context.BlacklistedPages.ToList();
                 var blackPages = new List<string>();
                 var websites = context.Websites.ToList();
-                Website website = websites[0];
-                var existingCategories = context.Categories.ToList();
-                foreach (var category in blacklistedCategories)
+                for (int i = 1; i < websites.Count(); i++)
                 {
-                    blackCategories.Add(category.Name);
-                }
-                foreach(var page in blacklistedPages)
-                {
-                    blackPages.Add(page.Url);
-                }
-                var categories = GetCategories(website.Url, blackCategories, website);
-                foreach (var category in categories)
-                {
-                    if (existingCategories.IsNullOrEmpty())
-                        context.Categories.Add(category);
-                    else
+                    Website website = websites[0];
+                    var existingCategories = context.Categories.ToList();
+                    foreach (var category in blacklistedCategories)
                     {
-                        if (existingCategories.Find(x => x.Name == category.Name && x.SourceUrl == category.SourceUrl) == null)
+                        blackCategories.Add(category.Name);
+                    }
+                    foreach (var page in blacklistedPages)
+                    {
+                        blackPages.Add(page.Url);
+                    }
+                    var categories = GetCategories(website.Url, blackCategories, website);
+                    foreach (var category in categories)
+                    {
+                        if (existingCategories.IsNullOrEmpty())
                             context.Categories.Add(category);
+                        else
+                        {
+                            if (existingCategories.Find(x => x.Name == category.Name && x.SourceUrl == category.SourceUrl) == null)
+                                context.Categories.Add(category);
+                        }
                     }
-                }
-                context.SaveChanges();
-               
-                var categoryList = context.Categories.ToList();
-                var ExistingEvents = context.Events.ToList();
-                List<string> EventUrls = new List<string>();
-                foreach (var link in ExistingEvents)
-                {
-                    EventUrls.Add(link.Url);
-                }
-                var eventLinks = new List<string>();
-                int pageAmount = GetPageAmount(categoryList[2].SourceUrl, website);
-                if (pageAmount == 0)
-                {
-                    eventLinks = GetEventLinks(categoryList[2].SourceUrl, eventLinks, website, blackPages);
-                }
-                else
-                {
-                    for (int i = 1; i <= pageAmount; i++)
-                    {
-                        eventLinks = GetEventLinks(categoryList[2].SourceUrl + "/page:" + i, eventLinks, website, blackPages);
-                        Thread.Sleep(10 * 1000);
-                    }
-                }
-                
-                var listEventDetails = GetEventDetails(eventLinks, website, categoryList[2].Name, blackPages, EventUrls, ExistingEvents);
-                foreach (var eventLink in listEventDetails)
-                {
-                    context.Events.Add(eventLink);
-                }
-                context.SaveChanges();
+                    context.SaveChanges();
 
-                /*for(int i = 0; i < 2; i++)
-                {
-                    var eventLinks = new List<string>();
-                    int pageAmount = GetPageAmount(categoryList[i].SourceUrl, website);
-                    if (pageAmount == 0)
+                    var categoryList = context.Categories.ToList();
+                    var ExistingEvents = context.Events.ToList();
+                    for(int j = 0; j < categoryList.Count(); j++)
                     {
-                        eventLinks = GetEventLinks(categoryList[i].SourceUrl, eventLinks, website, blackPages);
-                    }
-                    else
-                    {
-                        eventLinks = GetEventLinks(categoryList[i].SourceUrl + "/page:1", eventLinks, website, blackPages);
-                        //Pausing the core for 60 seconds after getting all links from one page
-                        Thread.Sleep(60000);
-                    }
-                    var listEventDetails = GetEventDetails(eventLinks, website, categoryList[i].Name, blackPages, EventUrls, ExistingEvents);
-                    foreach (var eventLink in listEventDetails)
-                    {
-                        context.Events.Add(eventLink);
-                    }
-                    context.SaveChanges();
-                    //Pausing the code for a minute in an attempt to avoid getting locked out of the page
-                    Thread.Sleep(2 * 60 * 1000);
-                }
-                /*foreach (var category in  categoryList)
-                {
-                    var eventLinks = new List<string>();
-                    int pageAmount = GetPageAmount(category.SourceUrl, website);
-                    if (pageAmount == 0)
-                    {
-                        eventLinks = GetEventLinks(category.SourceUrl, eventLinks, website, blackPages);
-                    }
-                    else
-                    {
-                        eventLinks = GetEventLinks(category.SourceUrl + "/page:1", eventLinks, website, blackPages);
-                        //Pausing the core for 30 seconds after getting all links from one page
-                        Thread.Sleep(60000);
-                    }
-                    var listEventDetails = GetEventDetails(eventLinks, website, category.Name, blackPages, EventUrls);
-                    foreach (var eventLink in listEventDetails)
-                    {
-                        context.Events.Add(eventLink);
-                    }
-                    context.SaveChanges();
-                    //Pausing the code for a minute in an attempt to avoid getting locked out of the page
-                    Thread.Sleep(5 * 60 * 1000);
-                }*/
-                var events = context.Events.ToList();
-                List<string> cities = new List<string>();
-                GetCities(cities, events);
-                var existingCities = context.Cities.ToList();
-                foreach(var city in cities)
-                {
-                    City newCity = new City();
-                    newCity.Name = city;
-                    if (!existingCities.Contains(newCity))
-                    {
-                        context.Cities.Add(newCity);
+                        List<string> EventUrls = new List<string>();
+                        foreach (var link in ExistingEvents)
+                        {
+                            EventUrls.Add(link.Url);
+                        }
+                        var eventLinks = new List<string>();
+                        int pageAmount = GetPageAmount(categoryList[j].SourceUrl, website);
+                        if (pageAmount == 0)
+                        {
+                            eventLinks = GetEventLinks(categoryList[j].SourceUrl, eventLinks, website, blackPages);
+                        }
+                        else
+                        {
+                            for (int x = 1; x <= pageAmount; x++)
+                            {
+                                eventLinks = GetEventLinks(categoryList[j].SourceUrl + "/page:" + x, eventLinks, website, blackPages);
+                                Thread.Sleep(30 * 1000);
+                            }
+                        }
+                        List<City> cities = new List<City>();
+                        var listEventDetails = GetEventDetails(eventLinks, website, categoryList[j].Name, blackPages, EventUrls, cities);
+                        foreach (var eventLink in listEventDetails)
+                        {
+                            context.Events.Add(eventLink);
+                        }
+                        List<City> existingCities = context.Cities.ToList();
+                        foreach (var city in cities)
+                        {
+                            if (!existingCities.Contains(city) && city.Name != null)
+                            {
+                                context.Cities.Add(city);
+                            }
+                        }
                         context.SaveChanges();
+                        var events = context.Events.ToList();
+                        Thread.Sleep(5 * 60 * 1000);
                     }
                 }
             }
@@ -198,77 +153,7 @@ namespace scraper
             }
             return categories;
         }
-        //splitint gali daugau negu i dvi dalis, tai reik pasirasyti if'us, kad normaliai gauti miestus
-        static List<string> GetCities(List<string> cities, List<Event> events)
-        {
-            foreach(var eventObject in events)
-            {
-                string location = eventObject.Location;
-                string[] locations = Regex.Split(location, ",\\s*");
-                if(!cities.Contains(locations[locations.Length - 1]))
-                {
-                    cities.Add(locations[locations.Length - 1]);
-                }
-            }
-            return cities;
-        }
-        static void GetChanges(string oldInformation, string newInformation, Event existingEvent, Event newEvent)
-        {
-            ChangedEvent newChanges = new ChangedEvent();
-            if(existingEvent.Title != newEvent.Title)
-            {
-                oldInformation += existingEvent.Title + "; ";
-                newInformation += newEvent.Title + "; ";
-            }
-            if(existingEvent.DateStart != newEvent.DateStart)
-            {
-                oldInformation += existingEvent.DateStart.ToString() + "; ";
-                newInformation += newEvent.DateStart.ToString() + "; ";
-            }
-            if (existingEvent.DateEnd != newEvent.DateEnd)
-            {
-                oldInformation += existingEvent.DateEnd.ToString() + "; ";
-                newInformation += newEvent.DateEnd.ToString() + "; ";
-            }
-            if(existingEvent.ImageLink != newEvent.ImageLink)
-            {
-                oldInformation += existingEvent.ImageLink + "; ";
-                newInformation += newEvent.ImageLink + "; ";
-            }
-            if(existingEvent.Price != newEvent.Price)
-            {
-                oldInformation += existingEvent.Price + "; ";
-                newInformation += newEvent.Price + "; ";
-            }
-            if(existingEvent.TicketLink != newEvent.TicketLink)
-            {
-                oldInformation += existingEvent.TicketLink + "; ";
-                newInformation += newEvent.TicketLink + "; ";
-            }
-            if(existingEvent.Location != newEvent.Location)
-            {
-                oldInformation += existingEvent.Location + "; ";
-                newInformation += newEvent.Location + "; ";
-            }
-            if (existingEvent.Category != newEvent.Category)
-            {
-                oldInformation += existingEvent.Category + "; ";
-                newInformation += newEvent.Category + "; ";
-            }
-        }
-        //kazka sumastyti su selenium
-        static void Kakava(string url)
-        {
-            var browser = new ScrapingBrowser();
-            var homepage = browser.NavigateToPage(new Uri("https://www.bilietai.lt/"));
-
-            var allLinks = homepage.Html.CssSelect("a");
-            foreach (var link in allLinks)
-            {
-                Console.WriteLine(link.OuterHtml);
-            }
-        }
-        static List<Event> GetEventDetails(List<string> urls, Website website, string CategoryName, List<string> blacklistedPages, List<string> EventUrls, List<Event> existingEvents)
+        static List<Event> GetEventDetails(List<string> urls, Website website, string CategoryName, List<string> blacklistedPages, List<string> EventUrls, List<City> cities)
         {
             var listEventDetails = new List<Event>();
 
@@ -284,16 +169,31 @@ namespace scraper
                     {
                         var newHtmlNode = GetHtml(eventLink);
                         var newEventObject = new Event();
-                        newEventObject.Location = newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.LocationPath).InnerText;
+                        Location location = GetLocationInfo(eventLink, website);
+                        newEventObject.Location = location.Address + ", " + location.City + ", " + location.Country;
+                        List<string> cityNames = new List<string>();
+                        foreach(var city in cities)
+                        {
+                            cityNames.Add(city.Name);
+                        }
+                        if (!cityNames.Contains(location.City))
+                        {
+                            City newCity = new City();
+                            newCity.Name = location.City;
+                            if(newCity.Name != null)
+                            {
+                                cities.Add(newCity);
+                            }
+                        }
                         newEventObject.ImageLink = newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.ImagePath).Attributes["src"].Value;
                         newEventObject.Url = eventLink;
                         string newTempTitle = newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.TitlePath).InnerText;
                         newTempTitle = Regex.Replace(newTempTitle, @"^\s+|\s+$", "");
                         newTempTitle = Regex.Replace(newTempTitle, "&quot;", "\"");
+                        newTempTitle = Regex.Replace(newTempTitle, "&amp;", "&");
                         newEventObject.Title = Regex.Replace(newTempTitle, "&#039;", "'");
 
                         newEventObject.Category = CategoryName;
-                        newEventObject.Updated = false;
                         if (newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.PricePath) == null)
                         {
                             newEventObject.Price = "Prekyba bilietais nebevykdoma";
@@ -332,50 +232,37 @@ namespace scraper
                         {
                             newEventObject.TicketLink = newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.TicketPath).Attributes[website.TicketLinkType].Value;
                         }
-                        /*if (EventUrls.Contains(newEventObject.Url))
-                        {
-                            foreach(var existingEvent in existingEvents)
-                            {
-                                if(existingEvent.Url == newEventObject.Url)
-                                {
-                                    Event tempEvent = existingEvent;
-                                    string oldInformation = null;
-                                    string newInformation = null;
-                                    GetChanges(oldInformation, newInformation, existingEvent, newEventObject);
-                                    ChangedEvent changedEvent = new ChangedEvent();
-                                    changedEvent.OldInformation = oldInformation;
-                                    changedEvent.NewInformation = newInformation;
-                                    changedEvent.ChangeTime = DateTime.Now;
-                                    changedEvent.Event = existingEvent;
-                                    tempEvent = newEventObject;
-                                    using (var context = new WebDbContext())
-                                    {
-                                        //context.Events.Update(tempEvent);
-                                        context.ChangedEvents.Add(changedEvent);
-                                        context.SaveChanges();
-                                    }
-                                }
-                            }
-                        }*/
                         if(newEventObject.Location != null && !EventUrls.Contains(newEventObject.Url))
                             listEventDetails.Add(newEventObject);
 
-                        Thread.Sleep(3500);
+                        Thread.Sleep(5000);
                     }
                 }
                 else
                 {
-                    EventObject.Location = htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.LocationPath).InnerText;
+                    Location location = GetLocationInfo(url, website);
+                    EventObject.Location = location.Address + ", " + location.City + ", " + location.Country;
+                    List<string> cityNames = new List<string>();
+                    foreach (var city in cities)
+                    {
+                        cityNames.Add(city.Name);
+                    }
+                    if (!cityNames.Contains(location.City))
+                    {
+                        City newCity = new City();
+                        newCity.Name = location.City;
+                        cities.Add(newCity);
+                    }
                 }
                 EventObject.ImageLink = htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.ImagePath).Attributes["src"].Value;
                 EventObject.Url = url;
                 string tempTitle = htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.TitlePath).InnerText;
                 tempTitle = Regex.Replace(tempTitle, @"^\s+|\s+$", "");
                 tempTitle = Regex.Replace(tempTitle, "&quot;", "\"");
+                tempTitle = Regex.Replace(tempTitle, "&amp;", "&");
                 EventObject.Title = Regex.Replace(tempTitle, "&#039;", "'");
                 
                 EventObject.Category = CategoryName;
-                EventObject.Updated = false;
                 if (htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.PricePath) == null)
                 {
                     EventObject.Price = "Prekyba bilietais nebevykdoma";
@@ -414,39 +301,14 @@ namespace scraper
                 {
                     EventObject.TicketLink = htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.TicketPath).Attributes[website.TicketLinkType].Value;
                 }
-                /*if (EventUrls.Contains(EventObject.Url))
-                {
-                    foreach (var existingEvent in existingEvents)
-                    {
-                        if (existingEvent.Url == EventObject.Url)
-                        {
-                            Event tempEvent = existingEvent;
-                            string oldInformation = null;
-                            string newInformation = null;
-                            GetChanges(oldInformation, newInformation, existingEvent, EventObject);
-                            ChangedEvent changedEvent = new ChangedEvent();
-                            changedEvent.OldInformation = oldInformation;
-                            changedEvent.NewInformation = newInformation;
-                            changedEvent.ChangeTime = DateTime.Now;
-                            changedEvent.Event = existingEvent;
-                            tempEvent = EventObject;
-                            using (var context = new WebDbContext())
-                            {
-                                //context.Events.Update(tempEvent);
-                                context.ChangedEvents.Add(changedEvent);
-                                context.SaveChanges();
-                            }
-                        }
-                    }
-                }*/
+    
                 if (EventObject.Location != null && !EventUrls.Contains(EventObject.Url))
                     listEventDetails.Add(EventObject);
 
-                Thread.Sleep(3500);
+                Thread.Sleep(5000);
             }
             return listEventDetails;
         }
-        //perdaryti, kad veiktu ir su seleniumu
         static int GetPageAmount(string url, Website website)
         {
             var pages = new List<int>();
@@ -469,6 +331,29 @@ namespace scraper
             }
             return maxPage;
         }
+        static Location GetLocationInfo(string url, Website website)
+        {
+            Location temp = new Location();
+            var htmlNode = GetHtml(url);
+
+            var nodes = htmlNode.OwnerDocument.DocumentNode.SelectNodes(website.FullLocationPath);
+            for(int i = 0; i < nodes.Count; i++)
+            {
+                if(i == 0)
+                {
+                    temp.Address = nodes[i].InnerText;
+                }
+                if (i == 1)
+                {
+                    temp.City = nodes[i].InnerText;
+                }
+                if (i == 2)
+                {
+                    temp.Country = nodes[i].InnerText;
+                }
+            }
+            return temp;
+        }
 
         static ScrapingBrowser browser = new ScrapingBrowser();
         static HtmlNode GetHtml(string url)
@@ -489,17 +374,13 @@ namespace scraper
         public string ImageLink { get; set; }
         public string Price { get; set; }
         public string TicketLink { get; set; }
-        public bool Updated { get; set; }
         public string Location { get; set; }
         public string Category { get; set; }
     }
-    public class ChangedEvent
+    public class City
     {
         public int Id { get; set; }
-        public string OldInformation { get; set; }
-        public string NewInformation { get; set; }
-        public DateTime ChangeTime { get; set; }
-        public Event Event { get; set; }
+        public string Name { get; set; }
     }
     public class Website
     {
@@ -516,6 +397,7 @@ namespace scraper
         public string CategoryLink { get; set; }
         public string PagerLink { get; set; }
         public string TicketLinkType { get; set; }
+        public string FullLocationPath { get; set; }
     }
     public class BlacklistedPage
     {
@@ -534,10 +416,13 @@ namespace scraper
         public string Name { get; set; }
         public string SourceUrl { get; set; }
     }
-    public class City
+    public class Location
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public string City { get; set; }
+        public string Country { get; set; }
+        public string Address { get; set; }
     }
     public class WebDbContext : DbContext
     {
@@ -546,44 +431,50 @@ namespace scraper
         public DbSet<BlacklistedPage> BlacklistedPages { get; set; }
         public DbSet<BlacklistedCategoryName> BlacklistedCategoryNames { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Location> Locations { get; set; }
         public DbSet<City> Cities { get; set; }
-        public DbSet<ChangedEvent> ChangedEvents { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(@"Server=tcp:event-radar-server.database.windows.net,1433;Initial Catalog=eventRadarDB;Persist Security Info=False;User ID=sadmin;Password=Epiktetas1;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
         }
     }
-    public interface IChangedEventRepository
+    public interface ILocationRepository
     {
-        Task CreateAsync(ChangedEvent changedEvent);
-        Task DeleteAsync(ChangedEvent changedEvent);
-        Task<ChangedEvent?> GetAsync(int changedEventId);
-        Task<IReadOnlyList<ChangedEvent>> GetManyAsync();
+        Task CreateAsync(Location location);
+        Task DeleteAsync(Location location);
+        Task UpdateAsync(Location location);
+        Task<Location?> GetAsync(int locationId);
+        Task<IReadOnlyList<Location>> GetManyAsync();
     }
-    public class ChangedEventRepository : IChangedEventRepository
+    public class LocationRepository : ILocationRepository
     {
         private readonly WebDbContext _webDbContext;
-        public ChangedEventRepository(WebDbContext webDbContext)
+        public LocationRepository(WebDbContext webDbContext)
         {
             _webDbContext = webDbContext;
         }
-        public async Task<ChangedEvent?> GetAsync(int changedEventId)
+        public async Task<Location?> GetAsync(int locationId)
         {
-            return await _webDbContext.ChangedEvents.FirstOrDefaultAsync(o => o.Id == changedEventId);
+            return await _webDbContext.Locations.FirstOrDefaultAsync(o => o.Id == locationId);
         }
-        public async Task<IReadOnlyList<ChangedEvent>> GetManyAsync()
+        public async Task<IReadOnlyList<Location>> GetManyAsync()
         {
-            return await _webDbContext.ChangedEvents.ToListAsync();
+            return await _webDbContext.Locations.ToListAsync();
         }
-        public async Task CreateAsync(ChangedEvent changedEvent)
+        public async Task CreateAsync(Location location)
         {
-            _webDbContext.ChangedEvents.Add(changedEvent);
+            _webDbContext.Locations.Add(location);
             await _webDbContext.SaveChangesAsync();
         }
-        public async Task DeleteAsync(ChangedEvent changedEvent)
+        public async Task UpdateAsync(Location location)
         {
-            _webDbContext.ChangedEvents.Remove(changedEvent);
+            _webDbContext.Locations.Update(location);
+            await _webDbContext.SaveChangesAsync();
+        }
+        public async Task DeleteAsync(Location location)
+        {
+            _webDbContext.Locations.Remove(location);
             await _webDbContext.SaveChangesAsync();
         }
     }
