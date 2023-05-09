@@ -40,7 +40,7 @@ namespace scraper
                 var websites = context.Websites.ToList();
                 for (int i = 1; i < websites.Count(); i++)
                 {
-                    Website website = websites[0];
+                    Website website = websites[i];
                     var existingCategories = context.Categories.ToList();
                     foreach (var category in blacklistedCategories)
                     {
@@ -65,44 +65,52 @@ namespace scraper
 
                     var categoryList = context.Categories.ToList();
                     var ExistingEvents = context.Events.ToList();
+                    List<string> categoryNames = new List<string>();
+                    foreach(var category in categoryList)
+                    {
+                        categoryNames.Add(category.SourceUrl);
+                    }
                     for(int j = 0; j < categoryList.Count(); j++)
                     {
-                        List<string> EventUrls = new List<string>();
-                        foreach (var link in ExistingEvents)
+                        if (categoryNames[j].Contains(website.Url))
                         {
-                            EventUrls.Add(link.Url);
-                        }
-                        var eventLinks = new List<string>();
-                        int pageAmount = GetPageAmount(categoryList[j].SourceUrl, website);
-                        if (pageAmount == 0)
-                        {
-                            eventLinks = GetEventLinks(categoryList[j].SourceUrl, eventLinks, website, blackPages);
-                        }
-                        else
-                        {
-                            for (int x = 1; x <= pageAmount; x++)
+                            List<string> EventUrls = new List<string>();
+                            foreach (var link in ExistingEvents)
                             {
-                                eventLinks = GetEventLinks(categoryList[j].SourceUrl + "/page:" + x, eventLinks, website, blackPages);
-                                Thread.Sleep(30 * 1000);
+                                EventUrls.Add(link.Url);
                             }
-                        }
-                        List<City> cities = new List<City>();
-                        var listEventDetails = GetEventDetails(eventLinks, website, categoryList[j].Name, blackPages, EventUrls, cities);
-                        foreach (var eventLink in listEventDetails)
-                        {
-                            context.Events.Add(eventLink);
-                        }
-                        List<City> existingCities = context.Cities.ToList();
-                        foreach (var city in cities)
-                        {
-                            if (!existingCities.Contains(city) && city.Name != null)
+                            var eventLinks = new List<string>();
+                            int pageAmount = GetPageAmount(categoryList[j].SourceUrl, website);
+                            if (pageAmount == 0)
                             {
-                                context.Cities.Add(city);
+                                eventLinks = GetEventLinks(categoryList[j].SourceUrl, eventLinks, website, blackPages);
                             }
+                            else
+                            {
+                                for (int x = 1; x <= pageAmount; x++)
+                                {
+                                    eventLinks = GetEventLinks(categoryList[j].SourceUrl + "/page:" + x, eventLinks, website, blackPages);
+                                    Thread.Sleep(30 * 1000);
+                                }
+                            }
+                            List<City> cities = new List<City>();
+                            var listEventDetails = GetEventDetails(eventLinks, website, categoryList[j].Name, blackPages, EventUrls, cities);
+                            foreach (var eventLink in listEventDetails)
+                            {
+                                context.Events.Add(eventLink);
+                            }
+                            List<City> existingCities = context.Cities.ToList();
+                            foreach (var city in cities)
+                            {
+                                if (!existingCities.Contains(city) && city.Name != null)
+                                {
+                                    context.Cities.Add(city);
+                                }
+                            }
+                            context.SaveChanges();
+                            var events = context.Events.ToList();
+                            Thread.Sleep(5 * 60 * 1000);
                         }
-                        context.SaveChanges();
-                        var events = context.Events.ToList();
-                        Thread.Sleep(5 * 60 * 1000);
                     }
                 }
             }
@@ -436,7 +444,7 @@ namespace scraper
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Server=tcp:event-radar-server.database.windows.net,1433;Initial Catalog=eventRadarDB;Persist Security Info=False;User ID=sadmin;Password=Epiktetas1;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+            optionsBuilder.UseSqlServer(@"Server=tcp:146.190.206.245,1433;Initial Catalog=eventRadar;Persist Security Info=False;User ID=sa;Password=verystrongpassword1!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
         }
     }
     public interface ILocationRepository
