@@ -1,27 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using HtmlAgilityPack;
+﻿using HtmlAgilityPack;
 using ScrapySharp.Extensions;
 using ScrapySharp.Network;
-using System.IO;
-using System.Globalization;
 using CsvHelper;
 using System.Text;
-using System.Diagnostics;
-using System.Formats.Asn1;
-using System.Xml;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Extensions.DependencyInjection;
-using static Microsoft.FSharp.Core.ByRefKinds;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Primitives;
-using System.Net;
-using System.Web;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
-using Microsoft.Identity.Client;
-using OpenQA.Selenium.DevTools.V110.Network;
 
 namespace scraper
 {
@@ -38,7 +22,7 @@ namespace scraper
                 var blacklistedPages = context.BlacklistedPages.ToList();
                 var blackPages = new List<string>();
                 var websites = context.Websites.ToList();
-                for (int i = 1; i < websites.Count(); i++)
+                for (int i = 2; i < websites.Count(); i++)
                 {
                     Website website = websites[i];
                     var existingCategories = context.Categories.ToList();
@@ -90,14 +74,15 @@ namespace scraper
                                 for (int x = 1; x <= pageAmount; x++)
                                 {
                                     eventLinks = GetEventLinks(categoryList[j].SourceUrl + "/page:" + x, eventLinks, website, blackPages);
-                                    Thread.Sleep(30 * 1000);
+                                    Thread.Sleep(20 * 1000);
                                 }
                             }
                             List<City> cities = new List<City>();
                             var listEventDetails = GetEventDetails(eventLinks, website, categoryList[j].Name, blackPages, EventUrls, cities);
                             foreach (var eventLink in listEventDetails)
                             {
-                                context.Events.Add(eventLink);
+                                if(ExistingEvents.Find(x => x.DateStart == eventLink.DateStart && x.DateEnd == eventLink.DateEnd && x.Location == eventLink.Location && x.Price == eventLink.Price) == null)
+                                    context.Events.Add(eventLink);
                             }
                             List<City> existingCities = context.Cities.ToList();
                             foreach (var city in cities)
@@ -109,7 +94,7 @@ namespace scraper
                             }
                             context.SaveChanges();
                             var events = context.Events.ToList();
-                            Thread.Sleep(5 * 60 * 1000);
+                            Thread.Sleep(2 * 60 * 1000);
                         }
                     }
                 }
@@ -132,7 +117,7 @@ namespace scraper
         static List<Category> GetCategories(string url, List<string> blackCategories, Website website)
         {
             var html = GetHtml(url);
-            Thread.Sleep(15000);
+            Thread.Sleep(5000);
             List<Category> categories = new List<Category>();
             var categoryLinks = html.CssSelect(website.CategoryLink);
             foreach (var link in categoryLinks)
@@ -204,14 +189,13 @@ namespace scraper
                         newEventObject.Category = CategoryName;
                         if (newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.PricePath) == null)
                         {
-                            newEventObject.Price = "Prekyba bilietais nebevykdoma";
+                            newEventObject.Price = "Tickets are not being sold";
                         }
                         else
                         {
                             newEventObject.Price = newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.PricePath).InnerText;
 
                         }
-
                         string newTempDate = newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.DatePath).InnerText;
                         newTempDate = Regex.Replace(newTempDate, "[a-zA-Z]+", "");
                         newTempDate = Regex.Replace(newTempDate, "&#32;", " ");
@@ -243,7 +227,7 @@ namespace scraper
                         if(newEventObject.Location != null && !EventUrls.Contains(newEventObject.Url))
                             listEventDetails.Add(newEventObject);
 
-                        Thread.Sleep(5000);
+                        Thread.Sleep(3500);
                     }
                 }
                 else
@@ -278,7 +262,6 @@ namespace scraper
                 else
                 {
                     EventObject.Price = htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.PricePath).InnerText;
-
                 }
 
                 string tempDate = htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.DatePath).InnerText;
@@ -313,7 +296,7 @@ namespace scraper
                 if (EventObject.Location != null && !EventUrls.Contains(EventObject.Url))
                     listEventDetails.Add(EventObject);
 
-                Thread.Sleep(5000);
+                Thread.Sleep(3500);
             }
             return listEventDetails;
         }
