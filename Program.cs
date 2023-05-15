@@ -22,7 +22,7 @@ namespace scraper
                 var blacklistedPages = context.BlacklistedPages.ToList();
                 var blackPages = new List<string>();
                 var websites = context.Websites.ToList();
-                for (int i = 2; i < websites.Count(); i++)
+                for (int i = 0 ; i < websites.Count(); i++)
                 {
                     Website website = websites[i];
                     var existingCategories = context.Categories.ToList();
@@ -162,141 +162,155 @@ namespace scraper
                     {
                         var newHtmlNode = GetHtml(eventLink);
                         var newEventObject = new Event();
-                        Location location = GetLocationInfo(eventLink, website);
-                        newEventObject.Location = location.Address + ", " + location.City + ", " + location.Country;
-                        List<string> cityNames = new List<string>();
-                        foreach(var city in cities)
+                        try
                         {
-                            cityNames.Add(city.Name);
+                            Location location = GetLocationInfo(eventLink, website);
+                            newEventObject.Location = location.Address + ", " + location.City + ", " + location.Country;
+                            List<string> cityNames = new List<string>();
+                            foreach (var city in cities)
+                            {
+                                cityNames.Add(city.Name);
+                            }
+                            if (!cityNames.Contains(location.City))
+                            {
+                                City newCity = new City();
+                                newCity.Name = location.City;
+                                if (newCity.Name != null)
+                                {
+                                    cities.Add(newCity);
+                                }
+                            }
+                            newEventObject.ImageLink = newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.ImagePath).Attributes["src"].Value;
+                            newEventObject.Url = eventLink;
+                            string newTempTitle = newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.TitlePath).InnerText;
+                            newTempTitle = Regex.Replace(newTempTitle, @"^\s+|\s+$", "");
+                            newTempTitle = Regex.Replace(newTempTitle, "&quot;", "\"");
+                            newTempTitle = Regex.Replace(newTempTitle, "&amp;", "&");
+                            newEventObject.Title = Regex.Replace(newTempTitle, "&#039;", "'");
+
+                            newEventObject.Category = CategoryName;
+                            if (newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.PricePath) == null)
+                            {
+                                newEventObject.Price = "Tickets are not being sold";
+                            }
+                            else
+                            {
+                                newEventObject.Price = newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.PricePath).InnerText;
+
+                            }
+                            string newTempDate = newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.DatePath).InnerText;
+                            newTempDate = Regex.Replace(newTempDate, "[a-zA-Z]+", "");
+                            newTempDate = Regex.Replace(newTempDate, "&#32;", " ");
+                            newTempDate = Regex.Replace(newTempDate, @"^\s+|\s+$", "");
+                            newTempDate = Regex.Replace(newTempDate, "[ąčęėįšųūžĄČĘĖĮŠŲŪŽ]", "");
+                            newTempDate = Regex.Replace(newTempDate, "  ", " ");
+
+                            if (newTempDate.Contains(" - "))
+                            {
+                                string[] dates = Regex.Split(newTempDate, @"\s-\s");
+                                newEventObject.DateStart = DateTime.Parse(dates[0]);
+                                newEventObject.DateEnd = DateTime.Parse(dates[1]);
+
+                            }
+                            else
+                            {
+                                newEventObject.DateStart = DateTime.Parse(newTempDate);
+                                newEventObject.DateEnd = DateTime.Parse(newTempDate);
+                            }
+
+                            if (newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.TicketPath) == null)
+                            {
+                                newEventObject.TicketLink = "";
+                            }
+                            else
+                            {
+                                newEventObject.TicketLink = newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.TicketPath).Attributes[website.TicketLinkType].Value;
+                            }
+                            if (newEventObject.Location != null && !EventUrls.Contains(newEventObject.Url))
+                                listEventDetails.Add(newEventObject);
+
+                            Thread.Sleep(3500);
                         }
-                        if (!cityNames.Contains(location.City))
+                        catch (System.FormatException)
+                        {
+                            continue;
+                        }
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        Location locationInfo = GetLocationInfo(url, website);
+                        EventObject.Location = locationInfo.Address + ", " + locationInfo.City + ", " + locationInfo.Country;
+                        List<string> cityNamesInfo = new List<string>();
+                        foreach (var city in cities)
+                        {
+                            cityNamesInfo.Add(city.Name);
+                        }
+                        if (!cityNamesInfo.Contains(locationInfo.City))
                         {
                             City newCity = new City();
-                            newCity.Name = location.City;
-                            if(newCity.Name != null)
-                            {
-                                cities.Add(newCity);
-                            }
+                            newCity.Name = locationInfo.City;
+                            cities.Add(newCity);
                         }
-                        newEventObject.ImageLink = newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.ImagePath).Attributes["src"].Value;
-                        newEventObject.Url = eventLink;
-                        string newTempTitle = newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.TitlePath).InnerText;
-                        newTempTitle = Regex.Replace(newTempTitle, @"^\s+|\s+$", "");
-                        newTempTitle = Regex.Replace(newTempTitle, "&quot;", "\"");
-                        newTempTitle = Regex.Replace(newTempTitle, "&amp;", "&");
-                        newEventObject.Title = Regex.Replace(newTempTitle, "&#039;", "'");
+                        EventObject.ImageLink = htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.ImagePath).Attributes["src"].Value;
+                        EventObject.Url = url;
+                        string tempTitle = htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.TitlePath).InnerText;
+                        tempTitle = Regex.Replace(tempTitle, @"^\s+|\s+$", "");
+                        tempTitle = Regex.Replace(tempTitle, "&quot;", "\"");
+                        tempTitle = Regex.Replace(tempTitle, "&amp;", "&");
+                        EventObject.Title = Regex.Replace(tempTitle, "&#039;", "'");
 
-                        newEventObject.Category = CategoryName;
-                        if (newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.PricePath) == null)
+                        EventObject.Category = CategoryName;
+                        if (htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.PricePath) == null)
                         {
-                            newEventObject.Price = "Tickets are not being sold";
+                            EventObject.Price = "Ticket are not being sold";
                         }
                         else
                         {
-                            newEventObject.Price = newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.PricePath).InnerText;
-
+                            EventObject.Price = htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.PricePath).InnerText;
                         }
-                        string newTempDate = newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.DatePath).InnerText;
-                        newTempDate = Regex.Replace(newTempDate, "[a-zA-Z]+", "");
-                        newTempDate = Regex.Replace(newTempDate, "&#32;", " ");
-                        newTempDate = Regex.Replace(newTempDate, @"^\s+|\s+$", "");
-                        newTempDate = Regex.Replace(newTempDate, "[ąčęėįšųūžĄČĘĖĮŠŲŪŽ]", "");
-                        newTempDate = Regex.Replace(newTempDate, "  ", " ");
 
-                        if (newTempDate.Contains(" - "))
+                        string tempDate = htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.DatePath).InnerText;
+                        tempDate = Regex.Replace(tempDate, "[a-zA-Z]+", "");
+                        tempDate = Regex.Replace(tempDate, "&#32;", " ");
+                        tempDate = Regex.Replace(tempDate, @"^\s+|\s+$", "");
+                        tempDate = Regex.Replace(tempDate, "[ąčęėįšųūžĄČĘĖĮŠŲŪŽ]", "");
+                        tempDate = Regex.Replace(tempDate, "  ", " ");
+
+                        if (tempDate.Contains(" - "))
                         {
-                            string[] dates = Regex.Split(newTempDate, @"\s-\s");
-                            newEventObject.DateStart = DateTime.Parse(dates[0]);
-                            newEventObject.DateEnd = DateTime.Parse(dates[1]);
+                            string[] dates = Regex.Split(tempDate, @"\s-\s");
+                            EventObject.DateStart = DateTime.Parse(dates[0]);
+                            EventObject.DateEnd = DateTime.Parse(dates[1]);
 
                         }
                         else
                         {
-                            newEventObject.DateStart = DateTime.Parse(newTempDate);
-                            newEventObject.DateEnd = DateTime.Parse(newTempDate);
+                            EventObject.DateStart = DateTime.Parse(tempDate);
+                            EventObject.DateEnd = DateTime.Parse(tempDate);
                         }
 
-                        if (newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.TicketPath) == null)
+                        if (htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.TicketPath) == null)
                         {
-                            newEventObject.TicketLink = "";
+                            EventObject.TicketLink = "";
                         }
                         else
                         {
-                            newEventObject.TicketLink = newHtmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.TicketPath).Attributes[website.TicketLinkType].Value;
+                            EventObject.TicketLink = htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.TicketPath).Attributes[website.TicketLinkType].Value;
                         }
-                        if(newEventObject.Location != null && !EventUrls.Contains(newEventObject.Url))
-                            listEventDetails.Add(newEventObject);
+
+                        if (EventObject.Location != null && !EventUrls.Contains(EventObject.Url))
+                            listEventDetails.Add(EventObject);
 
                         Thread.Sleep(3500);
                     }
-                }
-                else
-                {
-                    Location location = GetLocationInfo(url, website);
-                    EventObject.Location = location.Address + ", " + location.City + ", " + location.Country;
-                    List<string> cityNames = new List<string>();
-                    foreach (var city in cities)
+                    catch (System.FormatException)
                     {
-                        cityNames.Add(city.Name);
-                    }
-                    if (!cityNames.Contains(location.City))
-                    {
-                        City newCity = new City();
-                        newCity.Name = location.City;
-                        cities.Add(newCity);
+                        continue;
                     }
                 }
-                EventObject.ImageLink = htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.ImagePath).Attributes["src"].Value;
-                EventObject.Url = url;
-                string tempTitle = htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.TitlePath).InnerText;
-                tempTitle = Regex.Replace(tempTitle, @"^\s+|\s+$", "");
-                tempTitle = Regex.Replace(tempTitle, "&quot;", "\"");
-                tempTitle = Regex.Replace(tempTitle, "&amp;", "&");
-                EventObject.Title = Regex.Replace(tempTitle, "&#039;", "'");
-                
-                EventObject.Category = CategoryName;
-                if (htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.PricePath) == null)
-                {
-                    EventObject.Price = "Prekyba bilietais nebevykdoma";
-                }
-                else
-                {
-                    EventObject.Price = htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.PricePath).InnerText;
-                }
-
-                string tempDate = htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.DatePath).InnerText;
-                tempDate = Regex.Replace(tempDate, "[a-zA-Z]+", "");
-                tempDate = Regex.Replace(tempDate, "&#32;", " ");
-                tempDate = Regex.Replace(tempDate, @"^\s+|\s+$", "");
-                tempDate = Regex.Replace(tempDate, "[ąčęėįšųūžĄČĘĖĮŠŲŪŽ]", "");
-                tempDate = Regex.Replace(tempDate, "  ", " ");
-
-                if(tempDate.Contains(" - "))
-                {
-                    string[] dates = Regex.Split(tempDate, @"\s-\s");
-                    EventObject.DateStart = DateTime.Parse(dates[0]);
-                    EventObject.DateEnd = DateTime.Parse(dates[1]);
-
-                }
-                else
-                {
-                    EventObject.DateStart = DateTime.Parse(tempDate);
-                    EventObject.DateEnd = DateTime.Parse(tempDate);
-                }
-
-                if (htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.TicketPath) == null)
-                {
-                    EventObject.TicketLink = "";
-                }
-                else
-                {
-                    EventObject.TicketLink = htmlNode.OwnerDocument.DocumentNode.SelectSingleNode(website.TicketPath).Attributes[website.TicketLinkType].Value;
-                }
-    
-                if (EventObject.Location != null && !EventUrls.Contains(EventObject.Url))
-                    listEventDetails.Add(EventObject);
-
-                Thread.Sleep(3500);
             }
             return listEventDetails;
         }
@@ -333,14 +347,26 @@ namespace scraper
                 if(i == 0)
                 {
                     temp.Address = nodes[i].InnerText;
+                    temp.Address = Regex.Replace(temp.Address, @"^\s+|\s+$", "");
+                    temp.Address = Regex.Replace(temp.Address, "&quot;", "\"");
+                    temp.Address = Regex.Replace(temp.Address, "&amp;", "&");
+                    temp.Address = Regex.Replace(temp.Address, "&#039;", "'");
                 }
                 if (i == 1)
                 {
                     temp.City = nodes[i].InnerText;
+                    temp.City = Regex.Replace(temp.City, @"^\s+|\s+$", "");
+                    temp.City = Regex.Replace(temp.City, "&quot;", "\"");
+                    temp.City = Regex.Replace(temp.City, "&amp;", "&");
+                    temp.City = Regex.Replace(temp.City, "&#039;", "'");
                 }
                 if (i == 2)
                 {
                     temp.Country = nodes[i].InnerText;
+                    temp.Country = Regex.Replace(temp.Country, @"^\s+|\s+$", "");
+                    temp.Country = Regex.Replace(temp.Country, "&quot;", "\"");
+                    temp.Country = Regex.Replace(temp.Country, "&amp;", "&");
+                    temp.Country = Regex.Replace(temp.Country, "&#039;", "'");
                 }
             }
             return temp;
